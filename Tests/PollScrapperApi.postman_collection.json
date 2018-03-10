@@ -8,15 +8,106 @@
 	},
 	"item": [
 		{
-			"name": "Obtener todos los datos",
-			"request": {
-				"url": "{{url}}/api/v1/data",
-				"method": "GET",
-				"header": [],
-				"body": {},
-				"description": ""
-			},
-			"response": []
+			"name": "API",
+			"description": "",
+			"item": [
+				{
+					"name": "Departamentos",
+					"request": {
+						"url": "{{url}}/api/v1/departamentos",
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "Diputados - Preferencias",
+					"request": {
+						"url": "{{url}}/api/v1/diputados/preferencias",
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"description": ""
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "TSE",
+			"description": "",
+			"item": [
+				{
+					"name": "Root",
+					"request": {
+						"url": "http://elecciones2018.tse.gob.sv/data/navigation/root.json",
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "Departamento - San Salvador",
+					"request": {
+						"url": "http://elecciones2018.tse.gob.sv/data/navigation/0/2/2.json",
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "Municipio - San Salvador",
+					"request": {
+						"url": "http://elecciones2018.tse.gob.sv/data/navigation/0/3/3.json",
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "Asamblea Legislativa - Preferencias",
+					"request": {
+						"url": "http://elecciones2018.tse.gob.sv/data/results/r/0/1/6.json",
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {},
+						"description": ""
+					},
+					"response": []
+				}
+			]
 		}
 	]
 }

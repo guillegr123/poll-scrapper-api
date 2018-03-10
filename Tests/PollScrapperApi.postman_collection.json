@@ -1,0 +1,22 @@
+{
+	"variables": [],
+	"info": {
+		"name": "PollScrapperApi",
+		"_postman_id": "2c512bec-ed56-a97b-5185-ebf3167b0d70",
+		"description": "Pruebas de la PollScrapperApi.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Obtener todos los datos",
+			"request": {
+				"url": "{{url}}/api/v1/data",
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		}
+	]
+}

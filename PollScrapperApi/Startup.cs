@@ -14,9 +14,13 @@ namespace PollScrapperApi
 {
     public class Startup
     {
+        public static Environments Environment;
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+
+            Environment = (Environments)Enum.Parse(typeof(Environments), Configuration["Environment"]);
         }
 
         public IConfiguration Configuration { get; }

@@ -110,7 +110,8 @@ namespace PollScrapperApi.Controllers
         {
             using (HttpClient client = new HttpClient())
             {
-                using (HttpResponseMessage res = await client.GetAsync("https://contemosnosotros.org/staging/api"))
+                var cnUrl = (Startup.Environment == Environments.Staging) ? "https://contemosnosotros.org/staging/api" : "https://contemosnosotros.org/api";
+                using (HttpResponseMessage res = await client.GetAsync(cnUrl))
                 using (HttpContent content = res.Content)
                 {
                     string data = await content.ReadAsStringAsync();

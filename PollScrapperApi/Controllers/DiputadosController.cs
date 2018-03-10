@@ -39,15 +39,41 @@ namespace PollScrapperApi.Controllers
 
             var listaDiputados = new List<DiputadoPreferencia>();
 
+            // Insertar en lista, y primera pasada con tolerancia = 1
             foreach (var diputadoPref in taskPrefs.Result)
             {
                 diputadoPref.CnInfo
                     = diputadosCn.FirstOrDefault(x =>
                         string.Equals(x.DepartamentoNombre, diputadoPref.Departamento.NombreDepartamento, StringComparison.OrdinalIgnoreCase)
-                        && string.Equals(x.PartidoNombre, diputadoPref.AbreviaturaPartido, StringComparison.OrdinalIgnoreCase)
-                        && string.Equals(x.DiputadoNombre, diputadoPref.Nombre, StringComparison.OrdinalIgnoreCase));
+                        && (
+                            string.Equals(x.PartidoNombre, diputadoPref.AbreviaturaPartido, StringComparison.OrdinalIgnoreCase)
+                            || FrasesIguales(x.PartidoNombre, diputadoPref.AbreviaturaPartido, '-', 0, 2)
+                        )
+                        && (
+                            string.Equals(x.DiputadoNombre, diputadoPref.Nombre, StringComparison.OrdinalIgnoreCase)
+                            || FrasesIguales(x.DiputadoNombre, diputadoPref.Nombre, ' ', 1, 2)
+                        ));
 
                 listaDiputados.Add(diputadoPref);
+            }
+
+            // Segunda pasada con tolerancia 2, para los que faltaron de unir
+            foreach (var diputadoPref in listaDiputados)
+            {
+                if (diputadoPref.CnInfo == null)
+                {
+                    diputadoPref.CnInfo
+                    = diputadosCn.FirstOrDefault(x =>
+                        string.Equals(x.DepartamentoNombre, diputadoPref.Departamento.NombreDepartamento, StringComparison.OrdinalIgnoreCase)
+                        && (
+                            string.Equals(x.PartidoNombre, diputadoPref.AbreviaturaPartido, StringComparison.OrdinalIgnoreCase)
+                            || FrasesIguales(x.PartidoNombre, diputadoPref.AbreviaturaPartido, '-', 0, 2)
+                        )
+                        && (
+                            string.Equals(x.DiputadoNombre, diputadoPref.Nombre, StringComparison.OrdinalIgnoreCase)
+                            || FrasesIguales(x.DiputadoNombre, diputadoPref.Nombre, ' ', 2, 2)
+                        ));
+                }
             }
 
             return listaDiputados;
@@ -75,14 +101,7 @@ namespace PollScrapperApi.Controllers
                 var departamentoValue = d.Value;
                 foreach (var candidato in d.Value.optionsRegister)
                 {
-                    yield return new DiputadoPreferencia
-                    {
-                        Codigo = candidato.ballotCode,
-                        Nombre = candidato.ballotName,
-                        AbreviaturaPartido = candidato.partyAbbr,
-                        Votos = candidato.amount,
-                        Departamento = new Departamento(departamentoValue)
-                    };
+                    yield return new DiputadoPreferencia(candidato, departamentoValue);
                 }
             }
         }
@@ -105,6 +124,24 @@ namespace PollScrapperApi.Controllers
                     }
                 }
             }
+        }
+
+        private bool FrasesIguales(string frase1, string frase2, char separador, int tolerancia, int matchMinimo)
+        {
+            var palabras1 = frase1.Split(separador).Where(x => !string.Equals(x, "DE", StringComparison.OrdinalIgnoreCase)).ToArray();
+            var palabras2 = frase2.Split(separador).Where(x => !string.Equals(x, "DE", StringComparison.OrdinalIgnoreCase)).ToArray();
+
+            int contInconsistencias = 0;
+            int contMatches = 0;
+            foreach (var p1 in palabras1)
+            {
+                if (palabras2.Any(p2 => string.Equals(p1, p2, StringComparison.OrdinalIgnoreCase)))
+                    contMatches++;
+                else
+                    contInconsistencias++;
+            }
+
+            return (contInconsistencias <= tolerancia && contMatches >= matchMinimo);
         }
     }
 }

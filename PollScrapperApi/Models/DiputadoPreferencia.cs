@@ -11,5 +11,16 @@ namespace PollScrapperApi.Models
         public int Votos { set; get; }
 
         public CnModels.Diputado CnInfo { set; get; }
+
+        public DiputadoPreferencia(dynamic candidato, dynamic departamentoValue)
+        {
+            Codigo = candidato.ballotCode;
+            Nombre = candidato.ballotName;
+            AbreviaturaPartido = candidato.partyAbbr;
+            Votos = candidato.amount;
+            Departamento = new Departamento(departamentoValue);
+
+            Nombre = Nombre.Replace("&Ntilde;", "Ñ");
+        }
     }
 }

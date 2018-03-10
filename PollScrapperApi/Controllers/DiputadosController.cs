@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 using System.Net.Http;
 using Newtonsoft.Json.Linq;
 using PollScrapperApi.Models;
+using CnModels = PollScrapperApi.ContemosNosotros.Models;
+using Newtonsoft.Json;
 
 namespace PollScrapperApi.Controllers
 {
@@ -17,6 +19,42 @@ namespace PollScrapperApi.Controllers
         [Route("preferencias")]
         public async Task<IActionResult> Get()
         {
+            try
+            {
+                return Ok(new Respuesta<IList<DiputadoPreferencia>>(await ObtenerPreferenciasUnidas()));
+            }
+            catch (Exception)
+            {
+            }
+            return NotFound();
+        }
+
+        private async Task<IList<DiputadoPreferencia>> ObtenerPreferenciasUnidas()
+        {
+            var taskPrefs = ObtenerPreferencias();
+            var taskDiputadosCn = ObtenerDiputadosCnAsync();
+            await Task.WhenAll(new Task[] { taskPrefs, taskDiputadosCn });
+
+            var diputadosCn = taskDiputadosCn.Result.Data;
+
+            var listaDiputados = new List<DiputadoPreferencia>();
+
+            foreach (var diputadoPref in taskPrefs.Result)
+            {
+                diputadoPref.CnInfo
+                    = diputadosCn.FirstOrDefault(x =>
+                        string.Equals(x.DepartamentoNombre, diputadoPref.Departamento.NombreDepartamento, StringComparison.OrdinalIgnoreCase)
+                        && string.Equals(x.PartidoNombre, diputadoPref.AbreviaturaPartido, StringComparison.OrdinalIgnoreCase)
+                        && string.Equals(x.DiputadoNombre, diputadoPref.Nombre, StringComparison.OrdinalIgnoreCase));
+
+                listaDiputados.Add(diputadoPref);
+            }
+
+            return listaDiputados;
+        }
+
+        private async Task<IEnumerable<DiputadoPreferencia>> ObtenerPreferencias()
+        {
             var urlDeptos = "http://elecciones2018.tse.gob.sv/data/results/r/0/1/6.json";
             using (HttpClient client = new HttpClient())
             {
@@ -24,14 +62,10 @@ namespace PollScrapperApi.Controllers
                 using (HttpContent content = res.Content)
                 {
                     string data = await content.ReadAsStringAsync();
-                    if (data != null)
-                    {
-                        dynamic json = JObject.Parse(data);
-                        return Ok(new Respuesta<IEnumerable<DiputadoPreferencia>>(ObtenerDetalles(json)));
-                    }
+                    dynamic json = JObject.Parse(data);
+                    return ObtenerDetalles(json);
                 }
             }
-            return NotFound();
         }
 
         private IEnumerable<DiputadoPreferencia> ObtenerDetalles(dynamic json)
@@ -49,6 +83,26 @@ namespace PollScrapperApi.Controllers
                         Votos = candidato.amount,
                         Departamento = new Departamento(departamentoValue)
                     };
+                }
+            }
+        }
+
+        private async Task<CnModels.RespuestaDiputados> ObtenerDiputadosCnAsync()
+        {
+            using (HttpClient client = new HttpClient())
+            {
+                using (HttpResponseMessage res = await client.GetAsync("https://contemosnosotros.org/staging/api"))
+                using (HttpContent content = res.Content)
+                {
+                    string data = await content.ReadAsStringAsync();
+                    if (data != null)
+                    {
+                        return JsonConvert.DeserializeObject<CnModels.RespuestaDiputados>(data);
+                    }
+                    else
+                    {
+                        return new CnModels.RespuestaDiputados();
+                    }
                 }
             }
         }

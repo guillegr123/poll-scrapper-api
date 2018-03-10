@@ -9,6 +9,8 @@
         {
             CodDepartamento = dValue.customCode;
             NombreDepartamento = dValue.name;
+
+            NombreDepartamento = NombreDepartamento.Replace("&Ntilde;", "N");
         }
     }
 }

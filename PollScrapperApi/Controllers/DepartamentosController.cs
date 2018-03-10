@@ -20,15 +20,15 @@ namespace PollScrapperApi.Controllers
             using (HttpClient client = new HttpClient())
             {
                 using (HttpResponseMessage res = await client.GetAsync(urlDeptos))
-                using (HttpContent content = res.Content)
-                {
-                    string data = await content.ReadAsStringAsync();
-                    if (data != null)
+                    using (HttpContent content = res.Content)
                     {
-                        dynamic json = JObject.Parse(data);
-                        return Ok(new Respuesta<IEnumerable<Departamento>>(ObtenerDetalles(json)));
+                        string data = await content.ReadAsStringAsync();
+                        if (data != null)
+                        {
+                            dynamic json = JObject.Parse(data);
+                            return Ok(new Respuesta<IEnumerable<Departamento>>(ObtenerDetalles(json)));
+                        }
                     }
-                }
             }
             return NotFound();
         }

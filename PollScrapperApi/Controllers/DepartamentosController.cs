@@ -10,7 +10,7 @@ using PollScrapperApi.Models;
 namespace PollScrapperApi.Controllers
 {
     [Route("api/v1/[controller]")]
-    public class DataController : Controller
+    public class DepartamentosController : Controller
     {
         // GET api/values
         [HttpGet]
@@ -26,22 +26,18 @@ namespace PollScrapperApi.Controllers
                     if (data != null)
                     {
                         dynamic json = JObject.Parse(data);
-                        return Ok(new Respuesta<IEnumerable<Detalle>>(ObtenerDetalles(json)));
+                        return Ok(new Respuesta<IEnumerable<Departamento>>(ObtenerDetalles(json)));
                     }
                 }
             }
             return NotFound();
         }
 
-        private IEnumerable<Detalle> ObtenerDetalles(dynamic jsonDeptos)
+        private IEnumerable<Departamento> ObtenerDetalles(dynamic jsonDeptos)
         {
             foreach (var d in jsonDeptos.subRegions)
             {
-                yield return new Detalle
-                {
-                    CodDepartamento = d.Value.customCode,
-                    NombreDepartamento = d.Value.name
-                };
+                yield return new Departamento(d.Value);
             }
         }
 
